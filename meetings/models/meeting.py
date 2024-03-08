@@ -3,7 +3,7 @@
 # from django.contrib.auth.models import User
 
 
-# class Session(models.Model):
+# class Meeting(models.Model):
 #     id = models.AutoField()
 #     calendar = models.ForeignKey(Calendar)
 #     users = models.CharField("1, 2, 3")
