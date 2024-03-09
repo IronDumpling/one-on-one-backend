@@ -15,5 +15,12 @@ class Event(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     calendar = models.ForeignKey(calendar.Calendar, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
+    modified_time = models.DateTimeField(auto_now=True)
     # Extra: repeat & end time
 
+    class Meta:
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.name

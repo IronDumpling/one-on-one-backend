@@ -1,5 +1,4 @@
 from django.db import models
-# from .calendar import Calendar
 
 
 class Meeting(models.Model):
@@ -10,6 +9,13 @@ class Meeting(models.Model):
         FINALIZED = 'finalized', 'Finalized State'
 
     id = models.AutoField(primary_key=True, unique=True)
-    # calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
     state = models.CharField(choices=MeetingState.choices, max_length=20, default=MeetingState.EDIT)
+    created_time = models.DateTimeField(auto_now_add=True)
+    modified_time = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.name
