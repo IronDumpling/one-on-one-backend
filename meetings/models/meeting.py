@@ -11,5 +11,5 @@ class Meeting(models.Model):
 
     id = models.AutoField(primary_key=True, unique=True)
     # calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
-    state = models.CharField(choices=MeetingState.choices, max_length=20)
+    state = models.CharField(choices=MeetingState.choices, max_length=20, default=MeetingState.EDIT)
 

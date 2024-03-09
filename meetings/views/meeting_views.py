@@ -14,6 +14,8 @@ def meeting_list_view(request):
         serializer = meeting_serializer.MeetingSerializer(meetings, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
+        # TODO: Authentication
+        # Add the current user to the meeting
         serializer = meeting_serializer.MeetingSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
