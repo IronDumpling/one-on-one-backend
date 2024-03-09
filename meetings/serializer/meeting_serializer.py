@@ -5,5 +5,5 @@ from ..models import meeting
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = meeting.Meeting
-        fields = '__all__'
+        fields = ('name', 'description', 'state')
         
