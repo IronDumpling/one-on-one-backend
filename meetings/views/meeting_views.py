@@ -14,8 +14,9 @@ def meeting_list_view(request):
         serializer = meeting_serializer.MeetingSerializer(meetings, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
-        # TODO: Authentication
-        # Add the current user to the meeting
+        if request.user.is_authenticated:
+            # Add the current user to the meeting
+            pass
         serializer = meeting_serializer.MeetingSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -38,7 +39,7 @@ def meeting_view(request, meeting_id):
         serializer = meeting_serializer.MeetingSerializer(instance=meetings, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
