@@ -6,14 +6,27 @@ from ..serializer.contact_serializer import ContactSerializer
 from django.db import models
 from ..models.contact import Contact
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def contact_list_view(request):
-    user = request.user
-    print('current_user: ' + user.__str__())
-    contacts = Contact.objects.filter(models.Q(user1=user) | models.Q(user2=user))
-    serializer = ContactSerializer(contacts, many=True)
-    return Response(serializer.data)
+    match request.method:
+        case 'GET':
+            user = request.user
+            print('current_user: ' + user.__str__())
+            contacts = Contact.objects.filter(models.Q(user1=user) | models.Q(user2=user))
+            serializer = ContactSerializer(contacts, many=True)
+            return Response(serializer.data)
+        case 'POST':
+            data = request.data.copy()
+            data.update({'user1': request.user.id})
+
+            serializer = ContactSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
