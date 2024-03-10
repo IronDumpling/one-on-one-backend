@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from ..serializer.contact_serializer import ContactSerializer
+from ..serializer.contact_serializer import ContactSerializer, ContactInfoSerializer
 from django.db import models
 from ..models.contact import Contact, get_contact
 from django.contrib.auth.models import User
@@ -69,5 +69,5 @@ def contact_view(request, contact_id):
 
     match request.method:
         case "GET":
-            serializer = ContactSerializer(contact)
+            serializer = ContactInfoSerializer(contact, request.user)
             return Response(serializer.data)
