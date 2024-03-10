@@ -6,7 +6,7 @@ app_name = 'accounts'
 urlpatterns = [
     # path('', ),
     # path('<int:user_id>/', ),
-    path('register', register_view.register_view, name='login'),
-    path('<int:user_id>/contacts/', contact_views.contact_list_view, name="contact_list"),
+    path('register/', register_view.register_view, name='register'),
+    path('contacts/', contact_views.contact_list_view, name="contact_list"),
     path('<int:user_id>/contacts/<int:contact_id>/', contact_views.contact_view, name="contact"),
 ]
