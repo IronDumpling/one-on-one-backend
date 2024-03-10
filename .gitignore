@@ -1,2 +1,6 @@
 *.pyc
 */*.pyc
+db.sqlite3
+meetings/migrations/*
+accounts/migrations/*
+
