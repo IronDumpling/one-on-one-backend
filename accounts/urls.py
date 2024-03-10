@@ -1,12 +1,12 @@
 from django.urls import path
-from .views import contact_views
+from .views import contact_views, register_view
 
 app_name = 'accounts'
 
 urlpatterns = [
     # path('', ),
     # path('<int:user_id>/', ),
-
+    path('register', register_view.register_view, name='login'),
     path('<int:user_id>/contacts/', contact_views.contact_list_view, name="contact_list"),
     path('<int:user_id>/contacts/<int:contact_id>/', contact_views.contact_view, name="contact"),
 ]
