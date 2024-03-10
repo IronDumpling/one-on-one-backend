@@ -7,6 +7,7 @@ from ..models.member import Member
 from ..serializer import meeting_serializer
 
 
+# TODO: Authentication
 @api_view(['GET', 'POST'])
 def meeting_list_view(request):
 
@@ -15,23 +16,21 @@ def meeting_list_view(request):
         serializer = meeting_serializer.MeetingSerializer(meetings, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        if request.user.is_authenticated:
-            serializer = meeting_serializer.MeetingSerializer(data=request.data, partial=True)
-            if serializer.is_valid():
-                meeting = serializer.save()
-                Member.objects.create(meeting=meeting, user=request.user)
-                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = meeting_serializer.MeetingSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            meeting = serializer.save()
+            print("Current request user " + request.user.__str__())
+            Member.objects.create(meeting=meeting, user=request.user)
+            # TODO: create a join node
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(data=None, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# TODO: Authentication
 @api_view(['GET', 'PUT', 'DELETE'])
 def meeting_view(request, meeting_id):
     meetings = Meeting.objects.get(id=meeting_id)
-
-    # TODO: Authentication
 
     if request.method == 'GET':
         serializer = meeting_serializer.MeetingSerializer(meetings, many=False)
@@ -45,7 +44,7 @@ def meeting_view(request, meeting_id):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         meetings.delete()
-        return None
+        return Response(None, status=status.HTTP_200_OK)
 
 
 
