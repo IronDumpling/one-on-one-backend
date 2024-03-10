@@ -38,16 +38,20 @@ def meeting_view(request, meeting_id):
     meetings = Meeting.objects.get(id=meeting_id)
 
     if request.method == 'GET':
+        if meetings is None:
+            return Response(data=None, status=status.HTTP_404_NOT_FOUND)
+
         serializer = meeting_serializer.MeetingSerializer(meetings, many=False)
-        # TODO not found return 404
-        return Response(serializer.data)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
     elif request.method == 'PUT':
         serializer = meeting_serializer.MeetingSerializer(instance=meetings, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
+        if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_205_RESET_CONTENT)
+
     elif request.method == 'DELETE':
         meetings.delete()
-        return Response(None, status=status.HTTP_200_OK)
+        return Response(None, status=status.HTTP_205_RESET_CONTENT)
