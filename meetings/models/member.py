@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 
 
 class Member(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -12,6 +11,7 @@ class Member(models.Model):
 
     class Meta:
         ordering = ('id',)
+        unique_together = ['meeting', 'user']
 
     def __str__(self):
         return self.user.__str__()
