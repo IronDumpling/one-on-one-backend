@@ -36,7 +36,7 @@ def member_list_view(request, meeting_id):
 # @permission_classes([IsAuthenticated])
 def member_view(request, meeting_id, member_id):
     
-    member = Member.objects.get(pk=member_id,meeting = meeting_id)
+    member = Member.objects.get(user=member_id,meeting = meeting_id)
     if member== None:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
