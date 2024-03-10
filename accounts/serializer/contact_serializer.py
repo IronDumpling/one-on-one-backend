@@ -31,3 +31,8 @@ class ContactInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = ['id', 'user_id', 'alias']
+
+class ContactUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ['alias1', 'alias2']

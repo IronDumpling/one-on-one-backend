@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from ..serializer.contact_serializer import ContactSerializer, ContactInfoSerializer
+from ..serializer.contact_serializer import *
 from django.db import models
 from ..models.contact import Contact, get_contact
 from django.contrib.auth.models import User
@@ -70,4 +70,18 @@ def contact_view(request, contact_id):
     match request.method:
         case "GET":
             serializer = ContactInfoSerializer(contact, request.user)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        case "PUT":
+            data = request.data.copy()
+            data['id'] = contact_id
+            if request.user == contact.user1:
+                data['alias2'] = data.get('alias', '')
+            elif request.user == contact.user2:
+                data['alias1'] = data.get('alias', '')
+
+            serializer = ContactUpdateSerializer(contact, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
