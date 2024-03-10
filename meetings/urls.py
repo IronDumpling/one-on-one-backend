@@ -1,12 +1,14 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import meeting_views, calendar_views, member_views, node_views, event_views
 
 app_name = 'meetings'
 
+router = DefaultRouter()
+router.register(r'', meeting_views.MeetingViewSet, basename='meeting')
+
 urlpatterns = [
-    path('', meeting_views.meeting_list_view_get, name="meeting_list_get"),
-    path('', meeting_views.meeting_list_view_post, name="meeting_list_post"),
-    path('<int:meeting_id>/', meeting_views.meeting_view, name="meeting"),
+    path('', include(router.urls)),
 
     path('<int:meeting_id>/members/', member_views.member_list_view, name="member_list"),
     path('<int:meeting_id>/members/<int:member_id>/', member_views.member_view, name="member"),

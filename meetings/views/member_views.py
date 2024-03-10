@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from ..models.member import Member
@@ -11,7 +11,7 @@ from accounts.models.contact import get_contact
 
 
 @api_view(['GET', 'POST'])
-# @permission_classes([IsMember])
+@permission_classes([IsMember | IsAdminUser])
 def member_list_view(request, meeting_id):
     members = Member.objects.filter(meeting=meeting_id)
     if members is None:
@@ -30,18 +30,16 @@ def member_list_view(request, meeting_id):
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE','POST'])
-# @permission_classes([IsMember])
+@api_view(['GET', 'PUT', 'DELETE', 'POST'])
+@permission_classes([IsMember | IsAdminUser])
 def member_view(request, meeting_id, member_id):
-
     if request.method == 'GET':
-        try: 
+        try:
             member = Member.objects.get(user=member_id, meeting=meeting_id)
             serializer = MemberSerializer(member)
             return Response(serializer.data)
         except:
-            return Response({"error": "Member is not in meeting."},status=status.HTTP_404_NOT_FOUND)
-
+            return Response({"error": "Member is not in meeting."}, status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'PUT':
 
@@ -55,12 +53,12 @@ def member_view(request, meeting_id, member_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        try: 
+        try:
             member = Member.objects.get(user=member_id, meeting=meeting_id)
             member.delete()
-            return Response({"Delete success"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"Delete success"}, status=status.HTTP_204_NO_CONTENT)
         except:
-            return Response({"error": "Member is not in meeting."},status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Member is not in meeting."}, status=status.HTTP_404_NOT_FOUND)
 
 
     elif request.method == 'POST':
@@ -72,8 +70,5 @@ def member_view(request, meeting_id, member_id):
             serializer = MemberSerializer(member)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response({"error": "Member is not in contact with the requesting user."}, status=status.HTTP_403_FORBIDDEN)
-
-
-
-
+            return Response({"error": "Member is not in contact with the requesting user."},
+                            status=status.HTTP_403_FORBIDDEN)
