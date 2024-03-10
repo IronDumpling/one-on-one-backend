@@ -27,12 +27,11 @@ def meeting_list_view_post(request):
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     meeting = serializer.save()
-    Member.objects.create(meeting=meeting, user=request.user)
+    Member.objects.create(meeting=meeting, user=request.user, role='host')
     # TODO: create a join node
     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
-# TODO: Authentication
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsMember])
 def meeting_view(request, meeting_id):
@@ -40,6 +39,7 @@ def meeting_view(request, meeting_id):
 
     if request.method == 'GET':
         serializer = meeting_serializer.MeetingSerializer(meetings, many=False)
+        # TODO not found return 404
         return Response(serializer.data)
     elif request.method == 'PUT':
         serializer = meeting_serializer.MeetingSerializer(instance=meetings, data=request.data)
