@@ -35,16 +35,17 @@ def member_list_view(request, meeting_id):
 def member_view(request, meeting_id, member_id):
 
     if request.method == 'GET':
-        member = Member.objects.get(user=member_id, meeting=meeting_id)
+        try: 
+            member = Member.objects.get(user=member_id, meeting=meeting_id)
+            serializer = MemberSerializer(member)
+            return Response(serializer.data)
+        except:
+            return Response({"error": "Member is not in meeting."},status=status.HTTP_404_NOT_FOUND)
 
-        if member is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = MemberSerializer(member)
-        return Response(serializer.data)
 
     elif request.method == 'PUT':
-        member = Member.objects.get(user=member_id, meeting=meeting_id)
 
+        member = Member.objects.get(user=member_id, meeting=meeting_id)
         if member is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = MemberSerializer(member, data=request.data)
@@ -54,12 +55,13 @@ def member_view(request, meeting_id, member_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        member = Member.objects.get(user=member_id, meeting=meeting_id)
+        try: 
+            member = Member.objects.get(user=member_id, meeting=meeting_id)
+            member.delete()
+            return Response({"Delete success"},status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response({"error": "Member is not in meeting."},status=status.HTTP_404_NOT_FOUND)
 
-        if member is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        member.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     elif request.method == 'POST':
         # Check if the user is in contact with all users in the meeting
