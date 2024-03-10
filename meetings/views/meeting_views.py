@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from ..models import meeting
+from ..models.meeting import Meeting
+from ..models.member import Member
 from ..serializer import meeting_serializer
 
 
@@ -10,16 +11,16 @@ from ..serializer import meeting_serializer
 def meeting_list_view(request):
 
     if request.method == 'GET':
-        meetings = meeting.Meeting.objects.all()
+        meetings = Meeting.objects.all()
         serializer = meeting_serializer.MeetingSerializer(meetings, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         if request.user.is_authenticated:
             serializer = meeting_serializer.MeetingSerializer(data=request.data, partial=True)
             if serializer.is_valid():
-                serializer.save()
-                # Add the current user to the meeting
-                return Response(data=serializer.data, status=status.HTTP_200_OK)
+                meeting = serializer.save()
+                Member.objects.create(meeting=meeting, user=request.user)
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -28,7 +29,7 @@ def meeting_list_view(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def meeting_view(request, meeting_id):
-    meetings = meeting.Meeting.objects.get(id=meeting_id)
+    meetings = Meeting.objects.get(id=meeting_id)
 
     # TODO: Authentication
 
