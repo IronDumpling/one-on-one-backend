@@ -6,6 +6,7 @@ from ..serializer.contact_serializer import ContactSerializer
 from django.db import models
 from ..models.contact import Contact, get_contact
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 @api_view(['GET', 'POST', "DELETE"])
 @permission_classes([IsAuthenticated])
@@ -31,7 +32,7 @@ def contact_list_view(request):
             except User.DoesNotExist:
                 return Response({"error": "User2 does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
-            if Contact.objects.filter(models.Q(user1=user1, user2=user2) | models.Q(user1=user2, user2=user1)).exists():
+            if get_contact(user1, user2):
                 return Response({"error": "Contact already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
             serializer = ContactSerializer(data=data)
@@ -59,5 +60,14 @@ def contact_list_view(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def contact_view(request, user_id, contact_id):
-    pass
+@permission_classes([IsAuthenticated])
+def contact_view(request, contact_id):
+    contact = get_object_or_404(Contact, pk=contact_id)
+
+    if request.user not in [contact.user1, contact.user2]:
+        return Response({"error": "Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
+
+    match request.method:
+        case "GET":
+            serializer = ContactSerializer(contact)
+            return Response(serializer.data)
