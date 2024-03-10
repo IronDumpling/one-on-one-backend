@@ -4,7 +4,7 @@ from ..models import node
 
 class NodeSerializer(serializers.ModelSerializer):
 
-    meeting = serializers.ReadOnlyField(source='meeting.name')
+    # meeting = serializers.ReadOnlyField(source='meeting.name')
 
     class Meta:
         model = node.Node

@@ -8,22 +8,22 @@ from ..serializer import meeting_serializer
 
 @api_view(['GET', 'POST'])
 def meeting_list_view(request):
-    meetings = meeting.Meeting.objects.all()
 
     if request.method == 'GET':
+        meetings = meeting.Meeting.objects.all()
         serializer = meeting_serializer.MeetingSerializer(meetings, many=True)
-        return Response(serializer.data)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         if request.user.is_authenticated:
-            # Add the current user to the meeting
-            pass
-        serializer = meeting_serializer.MeetingSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            serializer = meeting_serializer.MeetingSerializer(data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                # Add the current user to the meeting
+                return Response(data=serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            # TODO: error handling
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=None, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
