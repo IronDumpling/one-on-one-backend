@@ -8,7 +8,7 @@ from ..serializer.calendar_serializer import CalendarSerializer
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def calendar_list_view(request, meeting_id):
 
     # TODO: Query
@@ -21,7 +21,7 @@ def calendar_list_view(request, meeting_id):
 
 
 @api_view(['GET', 'POST', 'PUT'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def calendar_view(request, meeting_id, member_id):
     # TODO: Query
     calendar = Calendar.objects.get(meeting=meeting_id,owner = member_id)
