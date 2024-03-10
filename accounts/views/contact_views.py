@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from ..serializer.contact_serializer import ContactSerializer
 from django.db import models
-from ..models.contact import Contact
+from ..models.contact import Contact, get_contact
 from django.contrib.auth.models import User
 
 @api_view(['GET', 'POST', "DELETE"])
@@ -49,8 +49,7 @@ def contact_list_view(request):
             except User.DoesNotExist:
                 return Response({"error": "User2 does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
-            contact = Contact.objects.filter(
-                models.Q(user1=user1, user2=user2) | models.Q(user1=user2, user2=user1)).first()
+            contact = get_contact(user1, user2)
             if contact:
                 contact.delete()
                 return Response({"message": "Contact deleted successfully."}, status=status.HTTP_200_OK)
