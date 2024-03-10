@@ -8,7 +8,7 @@ from ..models.contact import Contact, get_contact
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-@api_view(['GET', 'POST', "DELETE"])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def contact_list_view(request):
     match request.method:
@@ -41,21 +41,6 @@ def contact_list_view(request):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        case "DELETE":
-            user2_id = request.data.get('user2')
-            user1 = request.user
-
-            try:
-                user2 = User.objects.get(pk=user2_id)
-            except User.DoesNotExist:
-                return Response({"error": "User2 does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-
-            contact = get_contact(user1, user2)
-            if contact:
-                contact.delete()
-                return Response({"message": "Contact deleted successfully."}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Contact does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -85,3 +70,9 @@ def contact_view(request, contact_id):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        case "DELETE":
+            if contact:
+                contact.delete()
+                return Response({"message": "Contact deleted successfully."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Contact does not exist."}, status=status.HTTP_400_BAD_REQUEST)
