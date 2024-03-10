@@ -9,11 +9,11 @@ class Meeting(models.Model):
         FINALIZED = 'finalized', 'Finalized State'
 
     id = models.AutoField(primary_key=True, unique=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=120)
     description = models.CharField(max_length=120, null=True)
     state = models.CharField(choices=MeetingState.choices, max_length=20, default=MeetingState.EDIT)
-    created_time = models.DateTimeField(auto_now_add=True)
-    modified_time = models.DateTimeField(auto_now=True)
+    created_time = models.DateTimeField(auto_now_add=True, null=True)
+    modified_time = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         ordering = ('id',)

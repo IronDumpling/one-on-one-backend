@@ -11,7 +11,7 @@ class Event(models.Model):
     id = models.AutoField(primary_key=True, unique=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=120)
-    availability = models.CharField(choices=Availability, max_length=20)
+    availability = models.CharField(choices=Availability, max_length=20, default=Availability.BUSY)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     calendar = models.ForeignKey(calendar.Calendar, on_delete=models.CASCADE)

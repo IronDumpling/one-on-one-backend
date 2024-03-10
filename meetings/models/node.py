@@ -1,6 +1,7 @@
 from django.db import models
 from .meeting import Meeting
 from .member import Member
+from .calendar import Calendar
 
 
 class Node(models.Model):
@@ -9,6 +10,9 @@ class Node(models.Model):
     sender = models.ForeignKey(Member, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
     modified_time = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "node " + str(self.id)
 
 
 class RemindNode(Node):
@@ -25,7 +29,12 @@ class SubmitNode(Node):
 
 
 class PollNode(Node):
-    pass
+    class PollState(models.TextChoices):
+        ONGOING = 'on-going', 'On-Going State'
+        FINISHED = 'finished', 'Finished State'
+        CANCELED = 'canceled', 'Canceled State'
+
+    state = models.CharField(choices=PollState, max_length=50, default=PollState.ONGOING)
 
 
 class StateNode(Node):
