@@ -9,51 +9,6 @@ from ..serializer import meeting_serializer
 from ..permissions import IsMember
 
 
-# @api_view(['GET'])
-# @permission_classes([IsAdminUser])
-# def meeting_list_view_get(request):
-#     meetings = Meeting.objects.all()
-#     serializer = meeting_serializer.MeetingSerializer(meetings, many=True)
-#     return Response(data=serializer.data, status=status.HTTP_200_OK)
-#
-#
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def meeting_list_view_post(request):
-#     serializer = meeting_serializer.MeetingSerializer(data=request.data, partial=True)
-#     if not serializer.is_valid():
-#         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     meeting = serializer.save()
-#     Member.objects.create(meeting=meeting, user=request.user, role='host')
-#     # TODO: create a join node
-#     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
-# @api_view(['GET', 'PUT', 'DELETE'])
-# @permission_classes([IsMember | IsAdminUser])
-# def meeting_view(request, meeting_id):
-#     meetings = Meeting.objects.get(id=meeting_id)
-#
-#     if request.method == 'GET':
-#         if meetings is None:
-#             return Response(data={"detail": "Meeting does not exist."}, status=status.HTTP_404_NOT_FOUND)
-#
-#         serializer = meeting_serializer.MeetingSerializer(meetings, many=False)
-#         return Response(data=serializer.data, status=status.HTTP_200_OK)
-#
-#     elif request.method == 'PUT':
-#         serializer = meeting_serializer.MeetingSerializer(instance=meetings, data=request.data)
-#         if not serializer.is_valid():
-#             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#         serializer.save()
-#         return Response(data=serializer.data, status=status.HTTP_205_RESET_CONTENT)
-#
-#     elif request.method == 'DELETE':
-#         meetings.delete()
-#         return Response(data={"detail": "Meeting deleted."}, status=status.HTTP_205_RESET_CONTENT)
-
-
 class MeetingViewSet(viewsets.ModelViewSet):
     queryset = Meeting.objects.all()
     serializer_class = meeting_serializer.MeetingSerializer
@@ -70,6 +25,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         Member.objects.create(meeting=serializer.instance, user=request.user, role='host')
+        # TODO: create join node
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -89,6 +45,8 @@ class MeetingViewSet(viewsets.ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_205_RESET_CONTENT)
 
         elif request.method == 'DELETE':
+            if not Member.objects.filter(meeting=meeting, user=request.user, role=['host', 'Host']).exists():
+                return Response(data={"detail": "You are not the host of the meeting."}, status=status.HTTP_403_FORBIDDEN)
             meeting.delete()
             return Response(data={"detail": "Meeting deleted."}, status=status.HTTP_204_NO_CONTENT)
 
