@@ -16,7 +16,6 @@ class Member(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     modified_time = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         unique_together = ['meeting', 'user']
 
