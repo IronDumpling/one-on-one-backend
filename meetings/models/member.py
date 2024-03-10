@@ -10,7 +10,6 @@ class Member(models.Model):
     modified_time = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ('id',)
         unique_together = ['meeting', 'user']
 
     def __str__(self):

@@ -4,7 +4,8 @@ from .views import meeting_views, calendar_views, member_views, node_views, even
 app_name = 'meetings'
 
 urlpatterns = [
-    path('', meeting_views.meeting_list_view, name="meeting_list"),
+    path('', meeting_views.meeting_list_view_get, name="meeting_list_get"),
+    path('', meeting_views.meeting_list_view_post, name="meeting_list_post"),
     path('<int:meeting_id>/', meeting_views.meeting_view, name="meeting"),
 
     path('<int:meeting_id>/members/', member_views.member_list_view, name="member_list"),
