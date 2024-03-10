@@ -13,6 +13,6 @@ def register_view(request):
             password=request.data['password']
         )
         user.save()
-        return Response({"message": "User created successfully."}, status=status.HTTP_201_CREATED)
+        return Response({"message": "Register success."}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

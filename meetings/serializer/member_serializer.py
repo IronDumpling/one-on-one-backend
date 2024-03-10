@@ -6,4 +6,4 @@ class MemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = member.Member
-        fields = ['meeting', 'user']
+        fields = ['meeting', 'role','user']
