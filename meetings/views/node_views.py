@@ -21,19 +21,19 @@ def node_list_view(request, meeting_id):
     serializer = {}
 
     nodes = RemindNode.objects.filter(meeting=meeting)
-    serializer.update(RemindNodeSerializer(nodes, many=True))
+    serializer.update(RemindNodeSerializer(nodes, many=True).data)
 
     nodes = JoinNode.objects.filter(meeting=meeting)
-    serializer.update(JoinNodeSerializer(nodes, many=True))
+    serializer.update(JoinNodeSerializer(nodes, many=True).data)
 
     nodes = SubmitNode.objects.filter(meeting=meeting)
-    serializer.update(SubmitNodeSerializer(nodes, many=True))
+    serializer.update(SubmitNodeSerializer(nodes, many=True).data)
 
     nodes = PollNode.objects.filter(meeting=meeting)
-    serializer.update(PollNodeSerializer(nodes, many=True))
+    serializer.update(PollNodeSerializer(nodes, many=True).data)
 
     nodes = StateNode.objects.filter(meeting=meeting)
-    serializer.update(StateNodeSerializer(nodes, many=True))
+    serializer.update(StateNodeSerializer(nodes, many=True).data)
 
     sorted_data = sorted(serializer.items(), key=lambda x: x[1]['created_time'])
     sorted_data = dict(sorted_data)
@@ -68,7 +68,7 @@ def remind_node_list_view(request, meeting):
     if request.method == 'GET':
         nodes = RemindNode.objects.filter(meeting=meeting)
         serializer = RemindNodeSerializer(nodes, many=True)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         pass
@@ -78,7 +78,7 @@ def join_node_list_view(request, meeting):
     if request.method == 'GET':
         nodes = JoinNode.objects.filter(meeting=meeting)
         serializer = JoinNodeSerializer(nodes, many=True)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         pass
@@ -88,7 +88,7 @@ def submit_node_list_view(request, meeting):
     if request.method == 'GET':
         nodes = SubmitNode.objects.filter(meeting=meeting)
         serializer = SubmitNodeSerializer(nodes, many=True)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         pass
@@ -98,7 +98,7 @@ def poll_node_list_view(request, meeting):
     if request.method == 'GET':
         nodes = PollNode.objects.filter(meeting=meeting)
         serializer = PollNodeSerializer(nodes, many=True)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         pass
@@ -108,7 +108,7 @@ def state_node_list_view(request, meeting):
     if request.method == 'GET':
         nodes = StateNode.objects.filter(meeting=meeting)
         serializer = StateNodeSerializer(nodes, many=True)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         pass
@@ -143,7 +143,7 @@ def remind_node_view(request, meeting, node_id):
 
     if request.method == 'GET':
         serializer = RemindNodeSerializer(node, many=False)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
         pass
@@ -156,7 +156,7 @@ def join_node_view(request, meeting, node_id):
 
     if request.method == 'GET':
         serializer = JoinNodeSerializer(node, many=False)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
         pass
@@ -169,7 +169,7 @@ def submit_node_view(request, meeting, node_id):
 
     if request.method == 'GET':
         serializer = SubmitNodeSerializer(node, many=False)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
         pass
@@ -182,7 +182,7 @@ def poll_node_view(request, meeting, node_id):
 
     if request.method == 'GET':
         serializer = PollNodeSerializer(node, many=False)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
         pass
@@ -195,7 +195,7 @@ def state_node_view(request, meeting, node_id):
 
     if request.method == 'GET':
         serializer = StateNodeSerializer(node, many=False)
-        return Response(data=serializer, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
         pass
