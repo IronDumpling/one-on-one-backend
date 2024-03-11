@@ -58,7 +58,7 @@ def event_view(request, meeting_id, member_id, event_id):
         return Response(serializer.data)
     elif request.method == 'PUT':
         if not Event.objects.filter(calendar=calendar).exists():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"detail": "Event does not exist."}, status=status.HTTP_404_NOT_FOUND)
         
         if request.user == user:
             serializer = EventSerializer(event, data=request.data)
@@ -73,7 +73,7 @@ def event_view(request, meeting_id, member_id, event_id):
     
     elif request.method == 'DELETE':
         if not Event.objects.filter(calendar=calendar).exists():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"detail": "Event does not exist."}, status=status.HTTP_404_NOT_FOUND)
         
         if request.user == user:
             event.delete()
