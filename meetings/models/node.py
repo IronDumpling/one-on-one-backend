@@ -22,7 +22,7 @@ class Node(models.Model):
 
 class RemindNode(Node):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.CharField(max_length=120)
+    message = models.CharField(max_length=120, null=True)
 
 
 class JoinNode(Node):

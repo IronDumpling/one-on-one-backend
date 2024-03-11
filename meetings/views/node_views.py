@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 
 from ..models.meeting import Meeting
+from ..models.member import Member
 from ..models.node import RemindNode, JoinNode, SubmitNode, PollNode, StateNode
 from ..serializer.node_serializer import RemindNodeSerializer, JoinNodeSerializer, SubmitNodeSerializer, \
     PollNodeSerializer, StateNodeSerializer
@@ -71,7 +72,24 @@ def remind_node_list_view(request, meeting):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        pass
+        data = {
+            'meeting': meeting.id,
+            'sender': request.user.id,
+            **request.data
+        }
+        data['receiver'] = int(data.get('receiver')[0])
+        data['message'] = data.get('message')[0]
+        if data['receiver'] and not Member.objects.filter(meeting=meeting, user_id=data['receiver']).exists():
+            return Response(data={
+                'detail': f"The user with id {data['receiver']} is not a member of the meeting."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = RemindNodeSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 def join_node_list_view(request, meeting):
@@ -81,7 +99,23 @@ def join_node_list_view(request, meeting):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        pass
+        data = {
+            'meeting': meeting.id,
+            'sender': request.user.id,
+            **request.data
+        }
+        data['receiver'] = int(data.get('receiver')[0])
+        if data['receiver'] and not Member.objects.filter(meeting=meeting, user_id=data['receiver']).exists():
+            return Response(data={
+                'detail': f"The user with id {data['receiver']} is not a member of the meeting."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = JoinNodeSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 def submit_node_list_view(request, meeting):
@@ -91,7 +125,18 @@ def submit_node_list_view(request, meeting):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        pass
+        data = {
+            'meeting': meeting.id,
+            'sender': request.user.id,
+            **request.data
+        }
+
+        serializer = SubmitNodeSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 def poll_node_list_view(request, meeting):
@@ -111,11 +156,22 @@ def state_node_list_view(request, meeting):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        pass
+        data = {
+            'meeting': meeting.id,
+            'sender': request.user.id,
+            **request.data
+        }
+
+        serializer = StateNodeSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET', 'PUT'])
-@permission_classes([IsMember | IsAdminUser])
+# @permission_classes([IsMember | IsAdminUser])
 def type_node_view(request, meeting_id, node_type, node_id):
     meeting = Meeting.objects.get(id=meeting_id)
     if meeting is None:

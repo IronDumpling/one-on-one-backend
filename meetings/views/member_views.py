@@ -11,7 +11,7 @@ from accounts.models.contact import get_contact
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsMember | IsAdminUser])
+# @permission_classes([IsMember | IsAdminUser])
 def member_list_view(request, meeting_id):
     try:
         members = Member.objects.filter(meeting=meeting_id)
@@ -32,7 +32,7 @@ def member_list_view(request, meeting_id):
 
 
 @api_view(['GET', 'PUT', 'DELETE', 'POST'])
-@permission_classes([IsMember | IsAdminUser])
+# @permission_classes([IsMember | IsAdminUser])
 def member_view(request, meeting_id, member_id):
 
     if request.method == 'GET':
