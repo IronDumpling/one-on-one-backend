@@ -17,15 +17,19 @@ from django.contrib.auth.models import User
 def check_all_members_have_calendar(meeting_id):
 
     meeting = Meeting.objects.get(pk=meeting_id)
-    members = Member.objects.filter(meeting=meeting)
-    if members.count() <= 2:
-        return False, "The meeting does not have more than 2 members."
-    calendars = Calendar.objects.filter(meeting=meeting)
+    members = Member.objects.filter(meeting_id=meeting_id)
+    if members.count() < 2:
+        print(members.count())
+        print("The meeting does not have more than 2 members.")
+        return False
+    calendars = Calendar.objects.filter(meeting_id=meeting_id)
     calendar_owner_ids = calendars.values_list('owner', flat=True)
     for member in members:
-        if member.user.id not in calendar_owner_ids:
+        if member.user_id not in calendar_owner_ids:
+            print("still waiting")
             return False
-    return True, "All members have a calendar and the meeting has more than 2 members."
+    print("All members have a calendar and the meeting has more than 2 members.")
+    return True
     
 
 @api_view(['GET'])
@@ -69,7 +73,6 @@ def calendar_view(request, meeting_id, user_id):
         
         except Calendar.DoesNotExist:
             return Response(data={"detail": "This member have not created a calendar."},status=status.HTTP_404_NOT_FOUND)
-        
 
 
     elif request.method == 'POST':
@@ -88,15 +91,11 @@ def calendar_view(request, meeting_id, user_id):
         calendar = Calendar.objects.create(meeting_id=meeting_id, owner=user)
         serializer = CalendarSerializer(calendar)
 
-        if check_all_members_have_calendar(meeting_id):
-            try:
-                # 尝试获取ID为-1的用户
-                user = User.objects.get(id=-1)
-            except ObjectDoesNotExist:
-                print("User with ID -1 does not exist.")
-
-
-            calendar = Calendar.objects.create(meeting_id=meeting_id, owner=user)
+        if check_all_members_have_calendar(meeting_id) == True:
+           calendar = Calendar.objects.create(meeting_id=meeting_id)
+           empty_calendars = Calendar.objects.filter(owner__isnull=True)
+           for calendar in empty_calendars:
+                print(f"Calendar ID: {calendar.id}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
