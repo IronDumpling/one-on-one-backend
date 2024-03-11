@@ -68,7 +68,6 @@ def member_view(request, meeting_id, user_id):
         if Contact.objects.filter(user1=user, user2=user_id).exists():
             member = Member.objects.create(meeting_id=meeting_id, user_id=user_id)
             serializer = MemberSerializer(member)
-            # Create a join node on invited user
             JoinNode.objects.create(receiver=user_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
