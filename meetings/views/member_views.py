@@ -45,12 +45,12 @@ def member_view(request, meeting_id, user_id):
         return Response({"detail": "You do not have permission to perform this action."},
                         status=status.HTTP_403_FORBIDDEN)
 
-    try:
-        member = Member.objects.get(user=user_id, meeting=meeting_id)
-    except:
-        return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
-
     if request.method == 'GET':
+        try:
+            member = Member.objects.get(user=user_id, meeting=meeting_id)
+        except:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
         try:
             serializer = MemberSerializer(member)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -58,6 +58,11 @@ def member_view(request, meeting_id, user_id):
             return Response({"error": "Member is not in meeting."}, status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'PUT':
+        try:
+            member = Member.objects.get(user=user_id, meeting=meeting_id)
+        except:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = MemberSerializer(member, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -65,6 +70,10 @@ def member_view(request, meeting_id, user_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
+        try:
+            member = Member.objects.get(user=user_id, meeting=meeting_id)
+        except:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         if not Member.objects.filter(meeting=meeting_id, user=request.user, role=['host', 'Host']).exists():
             return Response(data={"detail": "You are not the host of the meeting."}, status=status.HTTP_403_FORBIDDEN)
