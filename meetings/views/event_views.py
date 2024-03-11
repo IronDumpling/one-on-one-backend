@@ -12,7 +12,7 @@ from ..serializer.event_serializer import EventSerializer
 from ..permissions import IsMember
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsMember | IsAdminUser])
 def event_list_view(request, meeting_id, member_id):
     try:
         meeting = Meeting.objects.get(id=meeting_id)
@@ -38,7 +38,7 @@ def event_list_view(request, meeting_id, member_id):
             return Response({"error": "You do not have permission to perform this action on other user."},
                             status=status.HTTP_403_FORBIDDEN)
 
-@permission_classes([IsAuthenticated])
+@permission_classes([IsMember | IsAdminUser])
 @api_view(['GET', 'PUT', 'DELETE'])
 def event_view(request, meeting_id, member_id, event_id):
     try:
