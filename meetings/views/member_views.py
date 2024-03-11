@@ -10,30 +10,22 @@ from accounts.models.contact import Contact
 from accounts.models.contact import get_contact
 
 
-@api_view(['GET', 'POST'])
-@permission_classes([IsMember | IsAdminUser])
+@api_view(['GET'])
+# @permission_classes([IsMember | IsAdminUser])
 def member_list_view(request, meeting_id):
     
     members = Member.objects.filter(meeting=meeting_id)
 
     if not members:
-        return Response({"error": "Members is not exsit."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Members does not exist."}, status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
         serializer = MemberSerializer(members, many=True)
         return Response(serializer.data)
 
-    # elif request.method == 'POST':
-
-    #     serializer = MemberSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['GET', 'PUT', 'DELETE', 'POST'])
-@permission_classes([IsMember | IsAdminUser])
+# @permission_classes([IsMember | IsAdminUser])
 def member_view(request, meeting_id, user_id):
 
     if request.method == 'GET':
@@ -65,7 +57,6 @@ def member_view(request, meeting_id, user_id):
             return Response({"Delete success"}, status=status.HTTP_204_NO_CONTENT)
         except Member.DoesNotExist:
             return Response({"error": "Member is not in meeting."}, status=status.HTTP_404_NOT_FOUND)
-
 
     elif request.method == 'POST':
         # Check if the user is in contact with all users in the meeting
