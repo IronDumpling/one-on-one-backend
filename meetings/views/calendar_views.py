@@ -3,14 +3,68 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from ..permissions import IsMember
-
+from django.db import models
 from ..models.calendar import Calendar
 from ..serializer.calendar_serializer import CalendarSerializer
 from ..models.member import Member
 from ..models.member import Meeting
+from ..models.event import Event
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 
+
+def find_intersection(curr_calendar,new_calendar):
+
+    curr_available_events = Event.objects.filter(
+                            calendar_id=curr_calendar.id, 
+                            availability=Event.Availability.AVAILABLE
+                            )
+    new_available_events = Event.objects.filter(
+                            calendar_id=new_calendar.id, 
+                            availability=Event.Availability.AVAILABLE
+                            )
+    
+    assert(curr_available_events.count() >= 0 and new_available_events.count() >= 0)
+
+    c1 = curr_available_events.count()
+    c2 = new_available_events.count()
+    i,j = 0,0
+    intersection = []
+    while(i < c1 and j < c2):
+        start1,end1 = curr_available_events[i].start_time,curr_available_events[i].end_time
+        start2,end2 = curr_available_events[j].start_time,curr_available_events[j].end_time
+
+        if start1 <= end2 and start2 <= end1:
+            intersection.extend([max(start1,start2),min(end1,end2)])
+        
+        if end1 < end2:
+            i = i + 1
+        else:
+            j = j + 1
+        
+
+
+def get_available_time_intersection(meeting_id):
+
+#find calendars id in this meeting
+    calendars = Calendar.objects.filter(meeting_id=meeting_id)
+
+    curr_calendar = calendars[0]
+    for calendar in calendars[1:]:
+
+        curr_intersection = find_intersection(curr_calendar,calendar)
+    if len(curr_intersection) == 0:
+        print("gg")
+        return []
+    else:
+        print(curr_intersection)
+        return curr_intersection
+
+#find events        
+        
+
+    return 
+#get intersection
 
 
 
@@ -92,10 +146,17 @@ def calendar_view(request, meeting_id, user_id):
         serializer = CalendarSerializer(calendar)
 
         if check_all_members_have_calendar(meeting_id) == True:
+           
+           get_available_time_intersection(meeting_id)
            calendar = Calendar.objects.create(meeting_id=meeting_id)
            empty_calendars = Calendar.objects.filter(owner__isnull=True)
+
            for calendar in empty_calendars:
                 print(f"Calendar ID: {calendar.id}")
+
+            
+
+            
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
