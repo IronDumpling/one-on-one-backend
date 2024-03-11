@@ -5,6 +5,10 @@ from django.contrib.auth.models import User
 
 
 class Calendar(models.Model):
+    class Availability(models.TextChoices):
+        BUSY = 'busy', 'Busy State'
+        MODERATE = 'moderate', 'Moderate State'
+        AVAILABLE = 'available', 'Available State'
 
     id = models.AutoField(primary_key=True, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, editable=False, null=True,blank=True)
@@ -12,7 +16,9 @@ class Calendar(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     modified_time = models.DateTimeField(auto_now=True)
     start_time = models.TimeField(default="09:00")
-    end_time = models.TimeField(default="10:00")
+    end_time = models.TimeField(default="19:00")
+    description = models.CharField(max_length=120, null=True)
+    availability = models.CharField(choices=Availability, max_length=20, default=Availability.BUSY)
 
     class Meta:
         ordering = ('id',)

@@ -11,13 +11,13 @@ from ..models.member import Meeting
 from ..models.event import Event
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
-
+from ..serializer.event_serializer import EventSerializer
 
 def find_intersection(curr_inter, new_inter):
-
+    
     if len(curr_inter) == 0 or len(new_inter) == 0:
         return []
-
+    
     i,j = 0,0
     intersection = []
     while i < len(curr_inter) and j < len(new_inter):
@@ -32,7 +32,10 @@ def find_intersection(curr_inter, new_inter):
             i = i + 1
         else:
             j = j + 1
+
+    print("1")
     return intersection
+    
         
 
 
@@ -45,12 +48,13 @@ def get_available_time_intersection(meeting_id):
         calendars.append([])
         for event in events:
             calendars[index].append((event.start_time, event.end_time))
-
-    curr_intersection = calendars[0]
+    
+    curr_calendar = calendars[0]
     for calendar in calendars[1:]:
         curr_intersection = find_intersection(curr_calendar,calendar)
         if len(curr_intersection) == 0:
             return []
+    print(curr_intersection)
     return curr_intersection
 
 
@@ -76,7 +80,6 @@ def check_all_members_have_calendar(meeting_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def calendar_list_view(request, meeting_id):
-
 
     calendars = Calendar.objects.filter(meeting = meeting_id)
     if not calendars:
@@ -118,40 +121,33 @@ def calendar_view(request, meeting_id, user_id):
 
     elif request.method == 'POST':
 
+        user = request.user
+
+        if user.id != user_id:
+            return Response(data={"detail": "You are not the owner."}, status=status.HTTP_404_NOT_FOUND)
+
         if Calendar.objects.filter(meeting=meeting_id, owner=request.user).exists():
             return Response(data={"detail": "You have created a calendar."}, status=status.HTTP_403_FORBIDDEN)
         
         if not Member.objects.filter(meeting=meeting_id, user=request.user).exists():
             return Response(data={"detail": "You are not in the meeting."}, status=status.HTTP_403_FORBIDDEN)
         
-        user = request.user
 
-        if user.id != user_id:
-            return Response(data={"detail": "You are not the owner."}, status=status.HTTP_404_NOT_FOUND)
         
         calendar = Calendar.objects.create(meeting_id=meeting_id, owner=user)
         serializer = CalendarSerializer(calendar)
 
         if check_all_members_have_calendar(meeting_id) == True:
            
-           get_available_time_intersection(meeting_id)
            calendar = Calendar.objects.create(meeting_id=meeting_id)
            empty_calendars = Calendar.objects.filter(owner__isnull=True)
 
            for calendar in empty_calendars:
                 print(f"Calendar ID: {calendar.id}")
 
-            
-
-            
-
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 #check if all the members have created calendar
-    
-        
-
-
 
     elif request.method == 'PUT':
 
@@ -160,6 +156,7 @@ def calendar_view(request, meeting_id, user_id):
         if user.id != user_id:
             return Response(data={"detail": "You are not the owner."}, status=status.HTTP_404_NOT_FOUND)
         calendar = Calendar.objects.get(meeting_id=meeting_id, owner=user)
+
         if calendar is None:
             return Response(data={"detail": "You have not created the calendar."},status=status.HTTP_404_NOT_FOUND)
         

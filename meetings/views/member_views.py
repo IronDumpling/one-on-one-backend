@@ -69,3 +69,4 @@ def member_view(request, meeting_id, user_id):
         else:
             return Response({"error": "Member is not in contact with the requesting user."},
                             status=status.HTTP_403_FORBIDDEN)
+
