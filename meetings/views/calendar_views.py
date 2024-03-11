@@ -13,58 +13,45 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 
 
-def find_intersection(curr_calendar,new_calendar):
+def find_intersection(curr_inter, new_inter):
 
-    curr_available_events = Event.objects.filter(
-                            calendar_id=curr_calendar.id, 
-                            availability=Event.Availability.AVAILABLE
-                            )
-    new_available_events = Event.objects.filter(
-                            calendar_id=new_calendar.id, 
-                            availability=Event.Availability.AVAILABLE
-                            )
-    
-    assert(curr_available_events.count() >= 0 and new_available_events.count() >= 0)
+    if len(curr_inter) == 0 or len(new_inter) == 0:
+        return []
 
-    c1 = curr_available_events.count()
-    c2 = new_available_events.count()
     i,j = 0,0
     intersection = []
-    while(i < c1 and j < c2):
-        start1,end1 = curr_available_events[i].start_time,curr_available_events[i].end_time
-        start2,end2 = curr_available_events[j].start_time,curr_available_events[j].end_time
+    while i < len(curr_inter) and j < len(new_inter):
+
+        start1, end1 = curr_inter[i]
+        start2, end2 = new_inter[j]
 
         if start1 <= end2 and start2 <= end1:
-            intersection.extend([max(start1,start2),min(end1,end2)])
-        
+            intersection.append((max(start1,start2),min(end1,end2)))
+
         if end1 < end2:
             i = i + 1
         else:
             j = j + 1
+    return intersection
         
 
 
 def get_available_time_intersection(meeting_id):
+    calendars_raw = Calendar.objects.filter(meeting_id=meeting_id)
+    calendars = []
+    for index in range(len(calendars_raw)):
+        calendar = calendars_raw[index]
+        events = Event.objects.filter(calendar=calendar, availability=Event.Availability.AVAILABLE).order_by('start_time')
+        calendars.append([])
+        for event in events:
+            calendars[index].append((event.start_time, event.end_time))
 
-#find calendars id in this meeting
-    calendars = Calendar.objects.filter(meeting_id=meeting_id)
-
-    curr_calendar = calendars[0]
+    curr_intersection = calendars[0]
     for calendar in calendars[1:]:
-
         curr_intersection = find_intersection(curr_calendar,calendar)
-    if len(curr_intersection) == 0:
-        print("gg")
-        return []
-    else:
-        print(curr_intersection)
-        return curr_intersection
-
-#find events        
-        
-
-    return 
-#get intersection
+        if len(curr_intersection) == 0:
+            return []
+    return curr_intersection
 
 
 
