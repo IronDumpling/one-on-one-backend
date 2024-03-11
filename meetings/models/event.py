@@ -1,5 +1,6 @@
 from django.db import models
 from . import calendar
+from django.contrib.auth.models import User
 
 
 class Event(models.Model):
