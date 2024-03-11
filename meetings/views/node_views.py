@@ -163,11 +163,11 @@ def poll_node_list_view(request, meeting):
             'meeting': meeting.id,
             'sender': request.user.id,
         }
-        serializer = PollNodeSerializer(data=data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        poll_serializer = PollNodeSerializer(data=data)
+        if not poll_serializer.is_valid():
+            return Response(data=poll_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        poll = serializer.save()
+        poll = poll_serializer.save()
 
         serializers = [OptionSerializer(data={
             'text': option, 'poll': poll.id
@@ -175,7 +175,12 @@ def poll_node_list_view(request, meeting):
 
         options = [serializer.save() for serializer in serializers if serializer.is_valid()]
 
-        return Response(data={poll, options}, status=status.HTTP_201_CREATED)
+        return Response(data={
+            'poll': poll_serializer.data,
+            'options': [
+                serializer.data for serializer in serializers
+            ]
+        }, status=status.HTTP_201_CREATED)
 
 
 def state_node_list_view(request, meeting):

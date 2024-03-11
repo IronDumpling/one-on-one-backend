@@ -35,9 +35,6 @@ def member_list_view(request, meeting_id):
 @api_view(['GET', 'PUT', 'DELETE', 'POST'])
 @permission_classes([IsMember | IsAdminUser])
 def member_view(request, meeting_id, user_id):
-    # if not Member.objects.filter(user=user_id, meeting=meeting_id).exists():
-    #     return Response(data={"detail": "You do not have permission to perform this action."}, status=status.HTTP_404_NOT_FOUND)
-    #
 
     try:
         meeting = Meeting.objects.get(id=meeting_id)
