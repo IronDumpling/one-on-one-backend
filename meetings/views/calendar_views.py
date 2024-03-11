@@ -8,6 +8,25 @@ from ..models.calendar import Calendar
 from ..serializer.calendar_serializer import CalendarSerializer
 from ..models.member import Member
 from ..models.member import Meeting
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import User
+
+
+
+
+def check_all_members_have_calendar(meeting_id):
+
+    meeting = Meeting.objects.get(pk=meeting_id)
+    members = Member.objects.filter(meeting=meeting)
+    if members.count() <= 2:
+        return False, "The meeting does not have more than 2 members."
+    calendars = Calendar.objects.filter(meeting=meeting)
+    calendar_owner_ids = calendars.values_list('owner', flat=True)
+    for member in members:
+        if member.user.id not in calendar_owner_ids:
+            return False
+    return True, "All members have a calendar and the meeting has more than 2 members."
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -68,7 +87,23 @@ def calendar_view(request, meeting_id, user_id):
         
         calendar = Calendar.objects.create(meeting_id=meeting_id, owner=user)
         serializer = CalendarSerializer(calendar)
+
+        if check_all_members_have_calendar(meeting_id):
+            try:
+                # 尝试获取ID为-1的用户
+                user = User.objects.get(id=-1)
+            except ObjectDoesNotExist:
+                print("User with ID -1 does not exist.")
+
+
+            calendar = Calendar.objects.create(meeting_id=meeting_id, owner=user)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+#check if all the members have created calendar
+    
+        
+
 
 
     elif request.method == 'PUT':
