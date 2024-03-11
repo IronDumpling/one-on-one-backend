@@ -33,6 +33,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, url_path='<int:meeting_id>/', url_name='meeting-detail', methods=['GET', 'PUT', 'DELETE'])
     def detail_view(self, request, meeting_id=None):
+        self.check_permissions(request)
         meeting = Meeting.objects.get(id=meeting_id)
         if request.method == 'GET':
             if meeting is None:

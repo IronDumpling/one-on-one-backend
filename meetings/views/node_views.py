@@ -45,7 +45,7 @@ def node_list_view(request, meeting_id):
 
 
 @api_view(['GET', 'POST'])
-# @permission_classes([IsMember | IsAdminUser])
+@permission_classes([IsMember | IsAdminUser])
 def type_node_list_view(request, meeting_id, node_type):
     meeting = Meeting.objects.get(id=meeting_id)
     if meeting is None:
