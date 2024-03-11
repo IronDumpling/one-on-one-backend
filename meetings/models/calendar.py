@@ -7,10 +7,12 @@ from django.contrib.auth.models import User
 class Calendar(models.Model):
 
     id = models.AutoField(primary_key=True, unique=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, editable=False, null=True,blank=True)
+    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE, editable=False)
     created_time = models.DateTimeField(auto_now_add=True)
     modified_time = models.DateTimeField(auto_now=True)
+    start_time = models.TimeField(default="09:00")
+    end_time = models.TimeField(default="10:00")
 
     class Meta:
         ordering = ('id',)
@@ -20,7 +22,7 @@ class Calendar(models.Model):
         return self.owner.__str__() + "'s calendar"
     
     def clean(self):
-        
+
         # Check if the owner is associated with a member of the meeting
         if not self.meeting.member_set.filter(user=self.owner).exists():
             raise ValidationError("The owner must be a member of the meeting.")

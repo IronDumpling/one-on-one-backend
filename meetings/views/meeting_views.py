@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from ..models.meeting import Meeting
 from ..models.member import Member
+from ..models.node import JoinNode
 from ..serializer import meeting_serializer
 from ..permissions import IsMember
 
@@ -25,7 +26,8 @@ class MeetingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         Member.objects.create(meeting=serializer.instance, user=request.user, role='host')
-        # TODO: create join node
+        # TODO Create a join node
+        # JoinNode.objects.create()
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
