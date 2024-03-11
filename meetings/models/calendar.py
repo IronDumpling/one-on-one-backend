@@ -1,8 +1,8 @@
 from django.db import models
 from .meeting import Meeting
-from .member import Member
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+
 
 class Calendar(models.Model):
 
