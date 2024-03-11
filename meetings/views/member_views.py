@@ -84,13 +84,11 @@ def member_view(request, meeting_id, user_id):
             return Response({"error": "Member is not in meeting."}, status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'POST':
-        # Check if the user is in contact with all users in the meeting
         user = request.user
-        # Check if the requesting user is in the meeting
-        if Contact.objects.filter(user1=user, user2=user_id).exists():
+        if Contact.objects.filter(user1=user, user2=user_id).exists() or Contact.objects.filter(user1=user_id, user2=user).exists():
             member = Member.objects.create(meeting_id=meeting_id, user_id=user_id)
             serializer = MemberSerializer(member)
-            JoinNode.objects.create(receiver=user_id, meeting_id=meeting_id, sender=request.user)
+            # JoinNode.objects.create(receiver_id=user_id, meeting_id=meeting_id, sender=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Member is not in contact with the requesting user."},
