@@ -26,13 +26,14 @@ class MeetingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         Member.objects.create(meeting=serializer.instance, user=request.user, role='host')
-        # TODO Create a join node
-        # JoinNode.objects.create()
+        # Create a join node on user itself
+        JoinNode.objects.create(receiver=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=True, url_path='<int:meeting_id>/', url_name='meeting-detail', methods=['GET', 'PUT', 'DELETE'])
-    def detail_view(self, request, meeting_id=None):
+    def detail(self, request, meeting_id=None):
+        self.check_permissions(request)
         meeting = Meeting.objects.get(id=meeting_id)
         if request.method == 'GET':
             if meeting is None:
@@ -57,7 +58,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         elif self.action == 'create':
             permission_classes = [IsAuthenticated]
-        elif self.action == 'detail_view':
+        elif self.action == 'retrieve' or self.action == 'update' or self.action == 'destroy':
             permission_classes = [IsMember | IsAdminUser]
         else:
             permission_classes = []
