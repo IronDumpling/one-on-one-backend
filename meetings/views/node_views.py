@@ -204,7 +204,7 @@ def remind_node_view(request, meeting, node_id):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        pass
+        return Response({"error": "Cannot modify this type of node"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def join_node_view(request, meeting, node_id):
@@ -217,7 +217,7 @@ def join_node_view(request, meeting, node_id):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        pass
+        return Response({"error": "Cannot modify this type of node"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def submit_node_view(request, meeting, node_id):
@@ -230,7 +230,7 @@ def submit_node_view(request, meeting, node_id):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        pass
+        return Response({"error": "Cannot modify this type of node"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def poll_node_view(request, meeting, node_id):
@@ -256,4 +256,4 @@ def state_node_view(request, meeting, node_id):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        pass
+        return Response({"error": "Cannot modify this type of node"}, status=status.HTTP_400_BAD_REQUEST)
