@@ -8,6 +8,7 @@ from ..serializer.calendar_serializer import CalendarSerializer
 from ..models.member import Member
 from ..models.member import Meeting
 from ..models.event import Event
+from ..models.node import SubmitNode
 
 
 def find_intersection(curr_inter, new_inter):
@@ -135,7 +136,8 @@ def calendar_view(request, meeting_id, user_id):
             for calendar in empty_calendars:
                 print(f"Calendar ID: {calendar.id}")
 
-        # TODO: add submit node
+        # Add a submit node
+        SubmitNode.objects.create()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     # check if all the members have created calendar
@@ -152,7 +154,8 @@ def calendar_view(request, meeting_id, user_id):
 
         serializer = CalendarSerializer(instance=calendar, data=request.data)
         if serializer.is_valid():
-            # TODO: add submit node
+            # Add a submit node
+            SubmitNode.objects.create()
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+from ..models.node import JoinNode
 from ..models.member import Member
 from ..permissions import IsMember, is_member
 from ..serializer.member_serializer import MemberSerializer
@@ -67,7 +68,8 @@ def member_view(request, meeting_id, user_id):
         if Contact.objects.filter(user1=user, user2=user_id).exists():
             member = Member.objects.create(meeting_id=meeting_id, user_id=user_id)
             serializer = MemberSerializer(member)
-            # TODO Create a join node
+            # Create a join node on invited user
+            JoinNode.objects.create(receiver=user_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Member is not in contact with the requesting user."},
