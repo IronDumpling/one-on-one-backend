@@ -1,9 +1,8 @@
-from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from django.http import JsonResponse, Http404
 from django.contrib.auth.models import User
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 
 from ..models.event import Event
 from ..models.meeting import Meeting
@@ -11,8 +10,9 @@ from ..models.calendar import Calendar
 from ..serializer.event_serializer import EventSerializer
 from ..permissions import IsMember
 
+
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsMember | IsAdminUser])
 def event_list_view(request, meeting_id, member_id):
     try:
         meeting = Meeting.objects.get(id=meeting_id)
@@ -38,8 +38,9 @@ def event_list_view(request, meeting_id, member_id):
             return Response({"error": "You do not have permission to perform this action on other user."},
                             status=status.HTTP_403_FORBIDDEN)
 
-@permission_classes([IsAuthenticated])
+
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsMember | IsAdminUser])
 def event_view(request, meeting_id, member_id, event_id):
     try:
         event = Event.objects.get(id=event_id)

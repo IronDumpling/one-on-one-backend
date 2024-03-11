@@ -12,7 +12,7 @@ from ..permissions import IsMember
 
 
 @api_view(['GET'])
-# @permission_classes([IsMember | IsAdminUser])
+@permission_classes([IsMember | IsAdminUser])
 def node_list_view(request, meeting_id):
     meeting = Meeting.objects.get(id=meeting_id)
     if meeting is None:
@@ -38,6 +38,8 @@ def node_list_view(request, meeting_id):
 
     sorted_data = sorted(serializer.items(), key=lambda x: x[1]['created_time'])
     sorted_data = dict(sorted_data)
+
+    # TODO: Error when nodes are a lot
 
     return Response(data=sorted_data, status=status.HTTP_200_OK)
 
@@ -171,7 +173,7 @@ def state_node_list_view(request, meeting):
 
 
 @api_view(['GET', 'PUT'])
-# @permission_classes([IsMember | IsAdminUser])
+@permission_classes([IsMember | IsAdminUser])
 def type_node_view(request, meeting_id, node_type, node_id):
     meeting = Meeting.objects.get(id=meeting_id)
     if meeting is None:

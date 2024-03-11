@@ -7,11 +7,10 @@ from ..models.member import Member
 from ..permissions import IsMember
 from ..serializer.member_serializer import MemberSerializer
 from accounts.models.contact import Contact
-from accounts.models.contact import get_contact
 
 
 @api_view(['GET'])
-# @permission_classes([IsMember | IsAdminUser])
+@permission_classes([IsMember | IsAdminUser])
 def member_list_view(request, meeting_id):
     
     members = Member.objects.filter(meeting=meeting_id)
@@ -25,7 +24,7 @@ def member_list_view(request, meeting_id):
 
 
 @api_view(['GET', 'PUT', 'DELETE', 'POST'])
-# @permission_classes([IsMember | IsAdminUser])
+@permission_classes([IsMember | IsAdminUser])
 def member_view(request, meeting_id, user_id):
 
     if request.method == 'GET':
@@ -65,6 +64,7 @@ def member_view(request, meeting_id, user_id):
         if Contact.objects.filter(user1=user, user2=user_id).exists():
             member = Member.objects.create(meeting_id=meeting_id, user_id=user_id)
             serializer = MemberSerializer(member)
+            # TODO Create a join node
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Member is not in contact with the requesting user."},
