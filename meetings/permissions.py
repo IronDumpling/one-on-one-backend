@@ -19,14 +19,21 @@ from .models.meeting import Meeting
 
 class IsMember(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        print("Is Member?")
+        if not request.user.is_authenticated:
+            print("Not authorized")
+            return False
 
         if isinstance(obj, Meeting):
+            print("Meeting")
             return obj.member_set.filter(user=request.user).exists()
 
         elif isinstance(obj, Calendar):
+            print("Calendar")
             return obj.meeting.member_set.filter(user=request.user).exists()
 
         elif isinstance(obj, Event):
+            print("Event")
             return obj.calendar.meeting.member_set.filter(user=request.user).exists()
 
         return False
