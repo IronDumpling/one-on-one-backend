@@ -12,11 +12,11 @@ from ..permissions import IsMember
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsMember | IsAdminUser])
-def event_list_view(request, meeting_id, member_id):
+@permission_classes([IsAdminUser])
+def event_list_view(request, meeting_id, user_id):
     try:
         meeting = Meeting.objects.get(id=meeting_id)
-        user = User.objects.get(id=member_id)
+        user = User.objects.get(id=user_id)
         calendar = Calendar.objects.get(meeting=meeting, owner=user)
     except Meeting.DoesNotExist or User.DoesNotExist or Calendar.DoesNotExist:
         return Response({"error": "Couldn't find such calender in database, double check your meeting/member id"}, status=status.HTTP_404_NOT_FOUND)
@@ -40,7 +40,7 @@ def event_list_view(request, meeting_id, member_id):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsMember | IsAdminUser])
-def event_view(request, meeting_id, member_id, event_id):
+def event_view(request, meeting_id, user_id, event_id):
     try:
         event = Event.objects.get(id=event_id)
     except Event.DoesNotExist:
@@ -48,7 +48,7 @@ def event_view(request, meeting_id, member_id, event_id):
     
     try:
         meeting = Meeting.objects.get(id=meeting_id)
-        user = User.objects.get(id=member_id)
+        user = User.objects.get(id=user_id)
         calendar = Calendar.objects.get(meeting=meeting, owner=user)
     except Meeting.DoesNotExist or User.DoesNotExist or Calendar.DoesNotExist:
         return Response({"error": "Couldn't find such calender in database, double check your meeting/user id"}, status=status.HTTP_404_NOT_FOUND)
