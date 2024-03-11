@@ -1,9 +1,8 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from ..permissions import IsMember
-from django.db import models
+from ..permissions import IsMember, is_member
 from ..models.calendar import Calendar
 from ..serializer.calendar_serializer import CalendarSerializer
 from ..models.member import Member
@@ -57,9 +56,6 @@ def get_available_time_intersection(meeting_id):
 
     # find events
 
-    return
-
-
 # get intersection
 
 
@@ -84,6 +80,8 @@ def check_all_members_have_calendar(meeting_id):
 @permission_classes([IsMember | IsAdminUser])
 def calendar_list_view(request, meeting_id):
     calendars = Calendar.objects.filter(meeting=meeting_id)
+    if not is_member(request, calendars):
+        return Response({"detail": "Is not a member."}, status=status.HTTP_403_FORBIDDEN)
     if not calendars:
         return Response(data={"detail": "The meeting is null."}, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
@@ -96,7 +94,7 @@ def calendar_list_view(request, meeting_id):
 @permission_classes([IsMember | IsAdminUser])
 def calendar_view(request, meeting_id, user_id):
     if not Member.objects.filter(meeting=meeting_id, user=request.user).exists():
-        return Response(data={"detail": "You are not the member of the meeting."}, status=status.HTTP_403_FORBIDDEN)
+        return Response(data={"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
 

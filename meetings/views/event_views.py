@@ -8,19 +8,24 @@ from ..models.event import Event
 from ..models.meeting import Meeting
 from ..models.calendar import Calendar
 from ..serializer.event_serializer import EventSerializer
-from ..permissions import IsMember
+from ..permissions import IsMember, is_member
 
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsMember | IsAdminUser])
-def event_list_view(request, meeting_id, member_id):
+def event_list_view(request, meeting_id, user_id):
     try:
         meeting = Meeting.objects.get(id=meeting_id)
-        user = User.objects.get(id=member_id)
+        user = User.objects.get(id=user_id)
         calendar = Calendar.objects.get(meeting=meeting, owner=user)
-    except Meeting.DoesNotExist or User.DoesNotExist or Calendar.DoesNotExist:
-        return Response({"error": "Couldn't find such calender in database, double check your meeting/member id"}, status=status.HTTP_404_NOT_FOUND)
-    
+    except:
+        return Response({"error": "Couldn't find such calender in database, double check your meeting/member id"},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    if not is_member(request, meeting) or not is_member(request, calendar):
+        return Response({"detail": "You do not have permission to perform this action."},
+                        status=status.HTTP_403_FORBIDDEN)
+
     if request.method == 'GET':
         event = Event.objects.filter(calendar=calendar)
         serializer = EventSerializer(event, many=True)
@@ -41,7 +46,7 @@ def event_list_view(request, meeting_id, member_id):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsMember | IsAdminUser])
-def event_view(request, meeting_id, member_id, event_id):
+def event_view(request, meeting_id, user_id, event_id):
     try:
         event = Event.objects.get(id=event_id)
     except Event.DoesNotExist:
@@ -49,10 +54,13 @@ def event_view(request, meeting_id, member_id, event_id):
     
     try:
         meeting = Meeting.objects.get(id=meeting_id)
-        user = User.objects.get(id=member_id)
+        user = User.objects.get(id=user_id)
         calendar = Calendar.objects.get(meeting=meeting, owner=user)
-    except Meeting.DoesNotExist or User.DoesNotExist or Calendar.DoesNotExist:
+    except:
         return Response({"error": "Couldn't find such calender in database, double check your meeting/user id"}, status=status.HTTP_404_NOT_FOUND)
+
+    if not is_member(request, meeting) or not is_member(request, calendar):
+        return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
         serializer = EventSerializer(event, many=False)

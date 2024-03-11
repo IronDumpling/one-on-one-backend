@@ -8,16 +8,19 @@ from ..models.member import Member
 from ..models.node import RemindNode, JoinNode, SubmitNode, PollNode, StateNode
 from ..serializer.node_serializer import RemindNodeSerializer, JoinNodeSerializer, SubmitNodeSerializer, \
     PollNodeSerializer, StateNodeSerializer
-from ..permissions import IsMember
+from ..permissions import IsMember, is_member
 
 
 @api_view(['GET'])
 @permission_classes([IsMember | IsAdminUser])
 def node_list_view(request, meeting_id):
-    meeting = Meeting.objects.get(id=meeting_id)
-    if meeting is None:
+    if not Meeting.objects.filter(id=meeting_id).exists():
         return Response(data={"detail": "Meeting does not exist."},
                         status=status.HTTP_404_NOT_FOUND)
+
+    meeting = Meeting.objects.get(id=meeting_id)
+    if not is_member(request, meeting):
+        return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
     serializer = {}
 
@@ -47,10 +50,13 @@ def node_list_view(request, meeting_id):
 @api_view(['GET', 'POST'])
 @permission_classes([IsMember | IsAdminUser])
 def type_node_list_view(request, meeting_id, node_type):
-    meeting = Meeting.objects.get(id=meeting_id)
-    if meeting is None:
+    if not Meeting.objects.filter(id=meeting_id).exists():
         return Response(data={"detail": "Meeting does not exist."},
                         status=status.HTTP_404_NOT_FOUND)
+
+    meeting = Meeting.objects.get(id=meeting_id)
+    if not is_member(request, meeting):
+        return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
     if node_type == 'remind' or node_type == 'Remind Node':
         return remind_node_list_view(request, meeting)
@@ -175,9 +181,13 @@ def state_node_list_view(request, meeting):
 @api_view(['GET', 'PUT'])
 @permission_classes([IsMember | IsAdminUser])
 def type_node_view(request, meeting_id, node_type, node_id):
+    if not Meeting.objects.filter(id=meeting_id).exists():
+        return Response(data={"detail": "Meeting does not exist."},
+                        status=status.HTTP_404_NOT_FOUND)
+
     meeting = Meeting.objects.get(id=meeting_id)
-    if meeting is None:
-        return Response(data={"detail": "Meeting does not exist."}, status=status.HTTP_404_NOT_FOUND)
+    if not is_member(request, meeting):
+        return Response({"detail": "Is not a member."}, status=status.HTTP_403_FORBIDDEN)
 
     if node_type == 'remind' or node_type == 'Remind Node':
         return remind_node_view(request, meeting, node_id)
