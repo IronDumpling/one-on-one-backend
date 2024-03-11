@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models.node import RemindNode, JoinNode, SubmitNode, PollNode, StateNode
+from ..models.node import RemindNode, JoinNode, SubmitNode, PollNode, StateNode, Option
 
 
 class RemindNodeSerializer(serializers.ModelSerializer):
@@ -30,3 +30,9 @@ class StateNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = StateNode
         fields = '__all__'
+
+
+class OptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Option
+        fields = ['id', 'text']

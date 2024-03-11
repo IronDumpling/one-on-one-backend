@@ -137,7 +137,7 @@ def calendar_view(request, meeting_id, user_id):
                 print(f"Calendar ID: {calendar.id}")
 
         # Add a submit node
-        SubmitNode.objects.create()
+        SubmitNode.objects.create(meeting_id=meeting_id, sender=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     # check if all the members have created calendar
@@ -155,7 +155,7 @@ def calendar_view(request, meeting_id, user_id):
         serializer = CalendarSerializer(instance=calendar, data=request.data)
         if serializer.is_valid():
             # Add a submit node
-            SubmitNode.objects.create()
+            SubmitNode.objects.create(meeting_id=meeting_id, sender=request.user)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

@@ -7,7 +7,7 @@ from ..models.meeting import Meeting
 from ..models.member import Member
 from ..models.node import RemindNode, JoinNode, SubmitNode, PollNode, StateNode
 from ..serializer.node_serializer import RemindNodeSerializer, JoinNodeSerializer, SubmitNodeSerializer, \
-    PollNodeSerializer, StateNodeSerializer
+    PollNodeSerializer, StateNodeSerializer, OptionSerializer
 from ..permissions import IsMember, is_member
 
 
@@ -26,18 +26,18 @@ def node_list_view(request, meeting_id):
 
     nodes = RemindNode.objects.filter(meeting=meeting)
     serializer.update(RemindNodeSerializer(nodes, many=True).data)
-
-    nodes = JoinNode.objects.filter(meeting=meeting)
-    serializer.update(JoinNodeSerializer(nodes, many=True).data)
-
-    nodes = SubmitNode.objects.filter(meeting=meeting)
-    serializer.update(SubmitNodeSerializer(nodes, many=True).data)
-
-    nodes = PollNode.objects.filter(meeting=meeting)
-    serializer.update(PollNodeSerializer(nodes, many=True).data)
-
-    nodes = StateNode.objects.filter(meeting=meeting)
-    serializer.update(StateNodeSerializer(nodes, many=True).data)
+    #
+    # nodes = JoinNode.objects.filter(meeting=meeting)
+    # serializer.update(JoinNodeSerializer(nodes, many=True).data)
+    #
+    # nodes = SubmitNode.objects.filter(meeting=meeting)
+    # serializer.update(SubmitNodeSerializer(nodes, many=True).data)
+    #
+    # nodes = PollNode.objects.filter(meeting=meeting)
+    # serializer.update(PollNodeSerializer(nodes, many=True).data)
+    #
+    # nodes = StateNode.objects.filter(meeting=meeting)
+    # serializer.update(StateNodeSerializer(nodes, many=True).data)
 
     sorted_data = sorted(serializer.items(), key=lambda x: x[1]['created_time'])
     sorted_data = dict(sorted_data)
@@ -154,7 +154,28 @@ def poll_node_list_view(request, meeting):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        pass
+        try:
+            options_data = request.data.get('options', [])
+        except:
+            return Response(data={'detail': 'Missing options field.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'meeting': meeting.id,
+            'sender': request.user.id,
+        }
+        serializer = PollNodeSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        poll = serializer.save()
+
+        serializers = [OptionSerializer(data={
+            'text': option, 'poll': poll.id
+        }) for option in options_data]
+
+        options = [serializer.save() for serializer in serializers if serializer.is_valid()]
+
+        return Response(data={poll, options}, status=status.HTTP_201_CREATED)
 
 
 def state_node_list_view(request, meeting):
@@ -253,7 +274,25 @@ def poll_node_view(request, meeting, node_id):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        pass
+        try:
+            selected_options = request.data.get('selected_options', [])
+        except:
+            return Response(data={"detail": "Not provide selected option"}, status=status.HTTP_400_BAD_REQUEST)
+
+        for option in selected_options:
+            if not node.option_set.filter(text=option).exist():
+                return Response(data={'detail': 'Selected option does not exist.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user in node.users_voted.all():
+            return Response(data={'detail': 'User has already voted in this poll.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        node.vote(request.user, selected_options)
+
+        members_count = meeting.member_set.count()
+        if node.users_voted.count() >= members_count:
+            node.state = PollNode.PollState.FINISHED
+            meeting.state = Meeting.MeetingState.APPROVING
 
 
 def state_node_view(request, meeting, node_id):

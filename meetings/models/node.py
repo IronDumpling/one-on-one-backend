@@ -40,8 +40,23 @@ class PollNode(Node):
         CANCELED = 'canceled', 'Canceled State'
 
     state = models.CharField(choices=PollState, max_length=50, default=PollState.ONGOING)
+    users_voted = models.ManyToManyField(User, related_name='voted_polls', blank=True)
+
+    def vote(self, user, selected_option):
+        self.users_voted.add(user)
+        Vote.objects.create(user=user, selected_option=selected_option)
+
+
+class Option(models.Model):
+    text = models.CharField(max_length=50)
+    poll = models.ForeignKey(PollNode, on_delete=models.CASCADE, related_name='options')
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    poll = models.ForeignKey(PollNode, on_delete=models.CASCADE)
+    selected_option = models.ForeignKey(Option, on_delete=models.CASCADE)
 
 
 class StateNode(Node):
     pass
-
